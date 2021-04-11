@@ -72,7 +72,7 @@ def remove_token(list, game1):   # will return a new state after removing a a to
 
 
 def main():
-    game1 = game(7, 4, [3,6,2], 0)
+    game1 = game(7, 3, [3,6,2], 0)
     print("the number of tokens :", game1.Token_number)
     print("all the tokens  :", game1.All_Tokens)
     print("the number of taken tokens :", game1.Token_taken)
