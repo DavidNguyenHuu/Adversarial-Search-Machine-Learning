@@ -1,3 +1,6 @@
+import copy
+
+
 def all_token1(s):  # will return a list for all the tokens in the game
     list1 = []
     for i in range(s + 1):
@@ -6,12 +9,12 @@ def all_token1(s):  # will return a list for all the tokens in the game
     return list1
 
 
-def remaining_token1(l1, l2):  # will return what tokens can be taken
+def remaining_token1(l1, l2):  # will return what tokens that are still available 
     l3 = list(set(l1) ^ set(l2))
     return l3
 
 
-def available_token1(size):  # will return the available token at the first round
+def available_token1(size):  # will return the available tokens to remove at the first round
     list1 = []
     for i in range(size + 1):
         if i % 2 != 0:
@@ -19,17 +22,17 @@ def available_token1(size):  # will return the available token at the first roun
     return list1
 
 
-def available_token2(number, list):  # will return the available token after the first round
-    list11 = []
-    for i in list:
+def available_token2(number, list1):  # will return the available tokens to remove after the first round
+    list2 = []
+    for i in list1:
         if i % number == 0 or number % i == 0:
-            list11.append(i)
-    return list11
+            list2.append(i)
+    return list2
 
 
-class game:
+class game:   
 
-    def __init__(self, Token_number, Token_taken, List_taken_token, depth):
+    def __init__(self, Token_number, Token_taken, List_taken_token, depth, parent):
         self.Token_number = Token_number
         self.All_Tokens = all_token1(self.Token_number)
         self.Token_taken = Token_taken
@@ -39,6 +42,7 @@ class game:
         self.remaining_token = remaining_token1(self.All_Tokens, self.list_token_taken)
         self.List_taken_token = List_taken_token
         self.depth = depth
+        self.parent = parent
 
 
 def tokens_to_remove(game1):  # will return a list of tokens that can be removed
@@ -57,46 +61,64 @@ def tokens_to_remove(game1):  # will return a list of tokens that can be removed
             return second_list
 
 
-def remove_token(list, game1):   # will return a new state after removing a a token
-    item = list.pop(0)
+def remove_token(list1, item1, game1):  # will return a new state after removing a a token
+    item = item1
+    test_game = copy.deepcopy(game1)
+    father_list = test_game.remaining_token
     list2 = []
     list3 = []
-    for i in game1.remaining_token:
+    for i in father_list:
         if i == item:
-            game1.remaining_token.remove(i)
-    list2 = game1.remaining_token
-    list3 = game1.list_token_taken
+            father_list.remove(i)
+            break
+    list2 = father_list
+    list3 = test_game.list_token_taken
     list3.append(item)
-    game_child = game(game1.Token_number, game1.Token_taken + 1, list3, game1.depth + 1)
+    game_child = game(game1.Token_number, game1.Token_taken + 1, list3, game1.depth + 1, game1)
     return game_child
 
 
-def main():
-    game1 = game(7, 3, [3,6,2], 0)
-    print("the number of tokens :", game1.Token_number)
-    print("all the tokens  :", game1.All_Tokens)
-    print("the number of taken tokens :", game1.Token_taken)
-    print("the taken tokens  :", game1.list_token_taken)
-    print("the remaining tokens  :", game1.remaining_token)
-    print("the depth of the game is :", game1.depth)
-    list1 = tokens_to_remove(game1)
-    if list1 is not None:
-        print("the available tokens to remove :", list1)
-    else:
-        print("you've lost the game")
+def remove_all_available_tokens(list1, game1):  # will return a list of all the possible moves  
+    child_list = []
+    for i in list1:
+        child_list.append(remove_token(list1, i, game1))
+    return child_list
 
-    child = remove_token(list1, game1)
-    print("the number of tokens in the child state:", child.Token_number)
-    print("all the tokens in the child state :", child.All_Tokens)
-    print("the number of taken tokens in the child state :", child.Token_taken)
-    print("the taken tokens in the child state :", child.list_token_taken)
-    print("the remaining tokens in the child state :", child.remaining_token)
-    print("the depth of the game in the child state is :", child.depth)
-    list2 = tokens_to_remove(child)
-    if list2 is not None:
-        print("the available tokens to remove in the child state :", list2)
+
+def print_winner(game1):  # will check if the winner is Max or Min 
+    if game1.Token_taken % 2 == 0:
+        print("Max will win")
     else:
-        print("you've lost the game")
+        print("Min will win")
+
+
+def find_leaves(game1):  # will return a list of all the leaves in the game 
+    leaves_list = []
+    depth1 = 0
+    max_depth = game1.Token_number - game1.Token_taken
+    test_game = game1
+    while depth1 <= max_depth:
+        list1 = tokens_to_remove(test_game)
+        print("the list of taken tokens", test_game.list_token_taken)
+        print("the remaining tokens ", test_game.remaining_token)
+        print("the tokens that can be taken", list1)
+        child_list = remove_all_available_tokens(list1, test_game)
+        for x in child_list:
+            test_game = x
+            print("we will test the game ", test_game.List_taken_token)
+            list2 = tokens_to_remove(x)
+            if not list2:
+                leaves_list.append(x)
+                print("the first leave is", leaves_list[0].List_taken_token)
+
+        depth1 = depth1 + 1
+    return leaves_list
+
+
+def main():
+    game1 = game(7, 0, [], 0, None)
+    list1 = find_leaves(game1)
+    print("the leaves list :", list1)
 
 
 if __name__ == '__main__':
