@@ -43,7 +43,10 @@ class game:
         self.List_taken_token = List_taken_token
         self.depth = depth
         self.parent = parent
-
+        if Token_taken % 2 == 0:
+            self.player = "Max"
+        else:
+            self.player = "Min"
 
 def tokens_to_remove(game1):  # will return a list of tokens that can be removed
     initial_list = []
@@ -85,11 +88,6 @@ def remove_all_available_tokens(list1, game1):  # will return a list of all the 
     return child_list
 
 
-def print_winner(game1):  # will check if the winner is Max or Min 
-    if game1.Token_taken % 2 == 0:
-        print("Max will win")
-    else:
-        print("Min will win")
 
 
 def find_leaves(game1):  # will return a list of all the leaves in the game 
