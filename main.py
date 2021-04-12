@@ -90,33 +90,74 @@ def remove_all_available_tokens(list1, game1):  # will return a list of all the 
 
 
 
-def find_leaves(game1):  # will return a list of all the leaves in the game 
-    leaves_list = []
-    depth1 = 0
-    max_depth = game1.Token_number - game1.Token_taken
-    test_game = game1
-    while depth1 <= max_depth:
-        list1 = tokens_to_remove(test_game)
-        print("the list of taken tokens", test_game.list_token_taken)
-        print("the remaining tokens ", test_game.remaining_token)
-        print("the tokens that can be taken", list1)
-        child_list = remove_all_available_tokens(list1, test_game)
-        for x in child_list:
-            test_game = x
-            print("we will test the game ", test_game.List_taken_token)
-            list2 = tokens_to_remove(x)
-            if not list2:
-                leaves_list.append(x)
-                print("the first leave is", leaves_list[0].List_taken_token)
+def static_board_eval(game1):   # will return a value based on the board evaluation
+    list1 = tokens_to_remove(game1)   # will save the list of tokens that can be removed in the current state
+    x = 0
+    y = game1.List_taken_token[-1]   # will save the last taken token
+    multiplies = 0                 # number of multiplies of the last taken token in case it was prime
+    one_is_taken = False           # False if 1 is not taken and True if 1 is taken
+    if list1 == [] and game1.player == "Max":  # will return -1 if it's max turn and there are no tokens to take
+        x = -1
+        return x
+    if list1 == [] and game1.player == "Min":  # will return 1 if it's min turn and there are no tokens to take
+        x = 1
+        return x
+    if game1.player == "Max":   # if the player is max
+        for x in game1.List_taken_token:   # will check if 1 is taken
+            if x == 1:
+                one_is_taken = True      # if 1 is taken set to True
 
-        depth1 = depth1 + 1
-    return leaves_list
+        if not one_is_taken:            # if 1 is not taken return 0
+            x = 0
+            return x
+        if y == 1:                  # the last taken token is 1
+            if len(list1) % 2 == 0:   # if the count of the possible successors is even return -0.5
+                x = -0.5
+                return x
+            else:          # if the count of the possible successors is odd return 0.5
+                x = 0.5
+                return x
+        if sympy.isprime(y):   # the last taken token is prime number
+            child_list = remove_all_available_tokens(list1, game1)  # return all the possible successors
+            for child in child_list:          # check for any multiple of the prime number in the  successors
+                for number in child.remaining_token:
+                    if number % y == 0:      # when a multiple is found increase the number of multiples by 1
+                        multiplies = multiplies + 1
+            if multiplies % 2 == 0:     # if the count of the multiples  is even return -0.7
+                x = -0.7
+                return x
+            else:                # if the count of the multiples  is odd return 0.7
+                x = 0.7
+                return x
+        if not sympy.isprime(y):  # the last taken token is composite number
+            max_prime = 0        # the largest prime that can divide the last taken token
+            for number in game1.remaining_token:
+                if y % number == 0:   # check if the number can divide the lase taken token
+                    print(number)
+                    if sympy.isprime(number):   # check if the number is prime
+                        if number > max_prime:  # set max prime to the number we found
+                            max_prime = number
+            if max_prime > 0:  # if a prime number was found
+                child_list = remove_all_available_tokens(list1, game1)
+                for child in child_list:   # check for any multiple of the prime number in the  successors
+                    for number in child.remaining_token:
+                        if number % max_prime == 0:   # when a multiple is found increase the number of multiples by 1
+                            multiplies = multiplies + 1
+                print("the length of the multiples ", multiplies)
+                if multiplies % 2 != 0:  # if the count of the multiples  is odd return 0.6
+                    x = 0.6
+                else:          # if the count of the multiples  is even return -0.6
+                    x = -0.6
+            else:          # any other case return -0.6
+                x = -0.6
+                return x
 
 
 def main():
-    game1 = game(7, 0, [], 0, None)
-    list1 = find_leaves(game1)
-    print("the leaves list :", list1)
+    game1 = game(7, 2, [1, 4], 0, None)
+    test = static_board_eval(game1)
+    print(test)
+
 
 
 if __name__ == '__main__':
