@@ -195,12 +195,36 @@ def static_board_eval(game1):  # will return a value based on the board evaluati
             else:
                 x = 0.6
                 return x
+            
+            
+def build_search_tree(game1):
+    tree1 = [game1]
+    tree2 = [game1]
+    print("the first element in the tree is :", tree1[0].list_token_taken)
+    while tree1:
+        test = tree1.pop(0)
+        list1 = tokens_to_remove(test)
+        if list1:
+            child_list = remove_all_available_tokens(list1, test)
+            for x in child_list:
+                tree2.append(x)
+                list2 = tokens_to_remove(x)
+                if list2:
+                    tree1.append(x)
 
+    return tree2
 
 def main():
-    game1 = game(7, 2, [1, 4], 0, None)
-    test = static_board_eval(game1)
-    print(test)
+    game1 = game(7, 2, [1, 3], 2, None)
+    max_depth = game1.Token_number - game1.depth
+    print("the max depth is :", max_depth)
+    print("the player is :", game1.player)
+    print("the player took these tokens", game1.list_token_taken)
+    print("the remaining tokens are :", game1.remaining_token)
+    search_tree = build_search_tree(game1)
+    print("the elements in the tree")
+    for x in search_tree:
+        print("the element is", x.list_token_taken,"the player turn is",x.player, " the depth is ", x.depth)
 
 
 
