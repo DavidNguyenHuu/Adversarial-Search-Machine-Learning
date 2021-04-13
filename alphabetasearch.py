@@ -217,7 +217,7 @@ def alpha_beta_search(depth, alpha, beta):
         return static_board_eval(game)
     if game.player:
         max_play = -inf
-        for i in game.list_childnodes:
+        for i in get_moves():
             max_play = max(max_play, i, depth - 1, alpha, beta, False)
             alpha = max(alpha, max_play)
             if beta <= alpha:
