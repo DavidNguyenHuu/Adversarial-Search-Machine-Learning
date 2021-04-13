@@ -169,10 +169,10 @@ def get_moves(move):
             return moves
 
 
-def alpha_beta_search(game, depth, maxPlayer, alpha, beta):
+def alpha_beta_search(depth, alpha, beta):
     if depth == 0 or game.terminate:
         return static_board_eval(game)
-    if maxPlayer:
+    if game.player:
         max_play = -inf
         for i in game.list_childnodes:
             max_play = max(max_play, i, depth - 1, alpha, beta, False)
