@@ -200,7 +200,6 @@ def static_board_eval(game1):  # will return a value based on the board evaluati
 def build_search_tree(game1):
     tree1 = [game1]
     tree2 = [game1]
-    print("the first element in the tree is :", tree1[0].list_token_taken)
     while tree1:
         test = tree1.pop(0)
         list1 = tokens_to_remove(test)
@@ -220,7 +219,7 @@ def main():
     print("the player took these tokens", game1.list_token_taken)
     print("the remaining tokens are :", game1.remaining_token)
     search_tree = build_search_tree(game1)
-    print("the elements in the tree")
+    print("the elements in the tree :")
     for x in search_tree:
         print("the element is", x.list_token_taken,"the player turn is",x.player, " the depth is ", x.depth)
 
