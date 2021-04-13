@@ -218,7 +218,7 @@ def alpha_beta_search(game,state,depth, alpha, beta):
     if game.player:
         v = -inf
         for i in remove_all_available_tokens(state):
-            max_play = max(v, i, depth - 1, alpha, beta, False)
+            v = max(v, i, depth - 1, alpha, beta, False)
             if v >= beta:
                 return v
             alpha = max(alpha, v)
@@ -227,7 +227,7 @@ def alpha_beta_search(game,state,depth, alpha, beta):
         else:
             v = +inf
             for i in remove_all_available_tokens(state):
-                min_play = min(v, i, depth - 1, alpha, beta, True)
+                v = min(v, i, depth - 1, alpha, beta, True)
                 if v <= alpha:
                     return v
                 beta = min(beta, v)
