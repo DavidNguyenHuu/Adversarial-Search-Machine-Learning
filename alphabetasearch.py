@@ -212,26 +212,26 @@ def get_moves(move):
             return moves
 
 
-def alpha_beta_search(depth, alpha, beta):
+def alpha_beta_search(game,state,depth, alpha, beta):
     if depth == 0 or game.terminate:
         return static_board_eval(game)
     if game.player:
-        max_play = -inf
-        for i in get_moves():
-            max_play = max(max_play, i, depth - 1, alpha, beta, False)
-            alpha = max(alpha, max_play)
-            if beta <= alpha:
-                break
-            return max_play
+        v = -inf
+        for i in remove_all_available_tokens(state):
+            max_play = max(v, i, depth - 1, alpha, beta, False)
+            if v >= beta:
+                return v
+            alpha = max(alpha, v)
+        return v
 
         else:
-            min_play = +inf
-            for i in game.list_nodes:
-                min_play = min(min_play, i, depth - 1, alpha, beta, True)
-                beta = min(beta, min_play)
-                if beta <= alpha:
-                    break
-                return min_play
+            v = +inf
+            for i in remove_all_available_tokens(state):
+                min_play = min(v, i, depth - 1, alpha, beta, True)
+                if v <= alpha:
+                    return v
+                beta = min(beta, v)
+            return v
 
 
 def main():
