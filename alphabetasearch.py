@@ -108,14 +108,14 @@ def static_board_eval(game1):  # will return a value based on the board evaluati
     if list1 == [] and game1.player == "Min":  # will return 1 if it's min turn and there are no tokens to take
         x = 1
         return x
-    if game1.player == "Max":  # if the player is max
-        for x in game1.List_taken_token:  # will check if 1 is taken
-            if x == 1:
-                one_is_taken = True  # if 1 is taken set to True
+    for x in game1.List_taken_token:  # will check if 1 is taken
+        if x == 1:
+            one_is_taken = True  # if 1 is taken set to True
 
-        if not one_is_taken:  # if 1 is not taken return 0
-            x = 0
-            return x
+    if not one_is_taken:  # if 1 is not taken return 0
+        x = 0
+        return x
+    if game1.player == "Max":  # if the player is max
         if y == 1:  # the last taken token is 1
             if len(list1) % 2 == 0:  # if the count of the possible successors is even return -0.5
                 x = -0.5
@@ -152,10 +152,53 @@ def static_board_eval(game1):  # will return a value based on the board evaluati
                 print("the length of the multiples ", multiplies)
                 if multiplies % 2 != 0:  # if the count of the multiples  is odd return 0.6
                     x = 0.6
+                    return x
                 else:  # if the count of the multiples  is even return -0.6
                     x = -0.6
+                    return x
             else:  # any other case return -0.6
                 x = -0.6
+                return x
+    else:
+        if y == 1:
+            if len(list1) % 2 == 0:
+                x = 0.5
+                return x
+            else:
+                x = -0.5
+                return x
+        if sympy.isprime(y):
+            child_list= remove_all_available_tokens(list1,game1)
+            for child in child_list:
+                for number in child.remaining_token:
+                    multiplies = multiplies + 1
+            if multiplies % 2 == 0:
+                x = 0.7
+                return x
+            else:
+                x = -0.7
+                return x
+        if not sympy.isprime(y):
+            max_prime = 0
+            for number in game1.remaining_token:
+                if y % number == 0:
+                    if sympy.isprime(number):
+                        if number > max_prime:
+                            max_prime = number
+            if max_prime > 0:
+                child_list= remove_all_available_tokens(list1,game1)
+                for child in child_list:
+                    for number in child.remaining_token:
+                        if number % max_prime == 0:
+                            multiplies = multiplies +1
+                if multiplies % 2 != 0:
+                    x = -0.6
+                    return x
+                else:
+                    x = 0.6
+                    return x
+            else:
+                x = 0.6
                 return x
 
 
