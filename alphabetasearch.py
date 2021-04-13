@@ -1,3 +1,4 @@
+#followed this psuedocode: https://www.javatpoint.com/ai-alpha-beta-pruning
 import copy
 from math import inf
 
