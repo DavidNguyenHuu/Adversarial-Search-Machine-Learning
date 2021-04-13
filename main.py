@@ -93,7 +93,8 @@ def remove_all_available_tokens(list1, game1):  # will return a list of all the 
 def static_board_eval(game1):   # will return a value based on the board evaluation
     list1 = tokens_to_remove(game1)   # will save the list of tokens that can be removed in the current state
     x = 0
-    y = game1.List_taken_token[-1]   # will save the last taken token
+    if game1.Token_taken > 0:
+        y = game1.List_taken_token[-1]  # will save the last taken token
     multiplies = 0                 # number of multiplies of the last taken token in case it was prime
     one_is_taken = False           # False if 1 is not taken and True if 1 is taken
     if list1 == [] and game1.player == "Max":  # will return -1 if it's max turn and there are no tokens to take
