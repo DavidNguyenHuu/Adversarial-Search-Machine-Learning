@@ -216,8 +216,6 @@ def build_search_tree(game1):
 
 def main():
     game1 = game(7, 2, [1, 3], 2, None)
-    max_depth = game1.Token_number - game1.depth
-    print("the max depth is :", max_depth)
     print("the player is :", game1.player)
     print("the player took these tokens", game1.list_token_taken)
     print("the remaining tokens are :", game1.remaining_token)
