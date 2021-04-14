@@ -1,4 +1,5 @@
 import copy
+import sympy
 
 
 def all_token1(s):  # will return a list for all the tokens in the game
@@ -9,7 +10,7 @@ def all_token1(s):  # will return a list for all the tokens in the game
     return list1
 
 
-def remaining_token1(l1, l2):  # will return what tokens that are still available 
+def remaining_token1(l1, l2):  # will return what tokens that are still available
     l3 = list(set(l1) ^ set(l2))
     return l3
 
@@ -30,7 +31,7 @@ def available_token2(number, list1):  # will return the available tokens to remo
     return list2
 
 
-class game:   
+class game:
 
     def __init__(self, Token_number, Token_taken, List_taken_token, depth, parent):
         self.Token_number = Token_number
@@ -43,10 +44,13 @@ class game:
         self.List_taken_token = List_taken_token
         self.depth = depth
         self.parent = parent
+        self.value = 0
+        self.child_value_list = []
         if Token_taken % 2 == 0:
             self.player = "Max"
         else:
             self.player = "Min"
+
 
 def tokens_to_remove(game1):  # will return a list of tokens that can be removed
     initial_list = []
@@ -81,13 +85,11 @@ def remove_token(list1, item1, game1):  # will return a new state after removing
     return game_child
 
 
-def remove_all_available_tokens(list1, game1):  # will return a list of all the possible moves  
+def remove_all_available_tokens(list1, game1):  # will return a list of all the possible moves
     child_list = []
     for i in list1:
         child_list.append(remove_token(list1, i, game1))
     return child_list
-
-
 
 
 def static_board_eval(game1):  # will return a value based on the board evaluation
@@ -163,7 +165,7 @@ def static_board_eval(game1):  # will return a value based on the board evaluati
                 x = -0.5
                 return x
         if sympy.isprime(y):
-            child_list= remove_all_available_tokens(list1,game1)
+            child_list = remove_all_available_tokens(list1, game1)
             for child in child_list:
                 for number in child.remaining_token:
                     multiplies = multiplies + 1
@@ -181,11 +183,11 @@ def static_board_eval(game1):  # will return a value based on the board evaluati
                         if number > max_prime:
                             max_prime = number
             if max_prime > 0:
-                child_list= remove_all_available_tokens(list1,game1)
+                child_list = remove_all_available_tokens(list1, game1)
                 for child in child_list:
                     for number in child.remaining_token:
                         if number % max_prime == 0:
-                            multiplies = multiplies +1
+                            multiplies = multiplies + 1
                 if multiplies % 2 != 0:
                     x = -0.6
                     return x
@@ -195,8 +197,8 @@ def static_board_eval(game1):  # will return a value based on the board evaluati
             else:
                 x = 0.6
                 return x
-            
-            
+
+
 def build_search_tree(game1):
     tree1 = [game1]
     tree2 = [game1]
@@ -213,16 +215,125 @@ def build_search_tree(game1):
 
     return tree2
 
-def main():
-    game1 = game(7, 2, [1, 3], 2, None)
-    print("the player is :", game1.player)
-    print("the player took these tokens", game1.list_token_taken)
-    print("the remaining tokens are :", game1.remaining_token)
-    search_tree = build_search_tree(game1)
-    print("the elements in the tree :")
-    for x in search_tree:
-        print("the element is", x.list_token_taken,"the player turn is",x.player, " the depth is ", x.depth)
 
+def max_value(game1):
+    max1 = -2
+    for x in game1.child_value_list:
+        if x.value > max1:
+            max1 = x.value
+    return max1
+
+
+def min_value(game1):
+    min1 = 2
+    for x in game1.child_value_list:
+        if x.value < min1:
+            min1 = x.value
+    return min1
+
+
+def get_leaves(tree1):
+    list1 = []
+    for x in tree1:
+        list2 = tokens_to_remove(x)
+        if not list2:
+            value1 = static_board_eval(x)
+            x.value = value1
+            list1.append(x)
+    return list1
+
+
+def get_parent_value(list1, x):
+    max1 = -2
+    min1 = 2
+    for y in list1:
+        if y.parent == x:
+            x.child_value_list.append(y)
+    if x.player == "Max":
+        max1 = max_value(x)
+        return max1
+    else:
+        min1 = min_value(x)
+        return min1
+
+
+def assign_values(tree1):
+    list_value_leaves = get_leaves(tree1)
+    list_value_not_leaves1 = []
+    tree_values = []
+    for x in list_value_leaves:
+        tree_values.append(x)
+    #      print("the leave number is  ", list_value_leaves.index(x))
+    #     print("the player turn is ", x.player)
+    #     print("the father node is ", x.parent.list_token_taken)
+    #     print("the value of the leaf", x.list_token_taken, "is :", x.value)
+    list_value_not_leaves = list(set(tree1) ^ set(list_value_leaves))
+    for x in list_value_not_leaves:
+        x.value = get_parent_value(list_value_leaves, x)
+        tree_values.append(x)
+    #    print("the player turn is ", x.player)
+    #    print("the value of the node ", x.list_token_taken, " is :", x.value)
+
+    return tree_values
+
+
+def Max(tree1, game1):
+    list1 = []
+    for x in tree1:
+        list2 = tokens_to_remove(x)
+        if not list2:
+            if x.value == 1:
+                list1.append(x)
+                while x.list_token_taken != game1.list_token_taken:
+                    list1.append(x.parent)
+                    x = x.parent
+    return list1
+
+
+def Min(tree1, game1):
+    list1 = []
+    for x in tree1:
+        list2 = tokens_to_remove(x)
+        if not list2:
+            if x.value == -1:
+                list1.append(x)
+                while x.list_token_taken != game1.list_token_taken:
+                    list1.append(x.parent)
+                    x = x.parent
+    return list1
+
+
+def Min_Max(game1):
+    best_move = 0
+    search = []
+    search_tree = build_search_tree(game1)
+    tree_value = assign_values(search_tree)
+    tree_value.reverse()
+    if game1.player == "Max":
+        search = Max(tree_value, game1)
+        if not search:
+            search = Min(tree_value, game1)
+    else:
+        search = Min(tree_value, game1)
+        if not search:
+            search = Max(tree_value,game1)
+    for x in search:
+        if x.depth == game1.depth + 1:
+            temp = x
+
+    best_move = temp.list_token_taken[-1]
+    value = temp.value
+    print("the best token to be removed is", best_move)
+    print("the value of this move", value)
+
+
+def main():
+    game1 = game(3, 0, [], 0, None)
+    game2 = game(7, 1, [1], 2, None)
+    game3 = game(10, 3, [4, 2, 6], 4, None)
+    Min_Max(game1)
+    Min_Max(game2)
+    Min_Max(game3)
 
 
 if __name__ == '__main__':
