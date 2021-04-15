@@ -4,6 +4,9 @@ from math import inf
 import sympy.ntheory as sympy
 
 nodesEvaluated = 0
+nodesVisited = 1
+depthReaches = []
+
 
 def all_token1(s):  # will return a list for all the tokens in the game
     list1 = []
@@ -34,7 +37,7 @@ def available_token2(number, list1):  # will return the available tokens to remo
     return list2
 
 
-class game:   
+class game:
 
     def __init__(self, Token_number, Token_taken, List_taken_token, depth, parent):
         self.Token_number = Token_number
@@ -51,6 +54,7 @@ class game:
             self.player = "Max"
         else:
             self.player = "Min"
+
 
 def tokens_to_remove(game1):  # will return a list of tokens that can be removed
     initial_list = []
@@ -90,7 +94,6 @@ def remove_all_available_tokens(list1, game1):  # will return a list of all the 
     for i in list1:
         child_list.append(remove_token(list1, i, game1))
     return child_list
-
 
 
 def static_board_eval(game1):  # will return a value based on the board evaluation
@@ -166,7 +169,7 @@ def static_board_eval(game1):  # will return a value based on the board evaluati
                 x = -0.5
                 return x
         if sympy.isprime(y):
-            child_list= remove_all_available_tokens(list1,game1)
+            child_list = remove_all_available_tokens(list1, game1)
             for child in child_list:
                 for number in child.remaining_token:
                     multiplies = multiplies + 1
@@ -184,11 +187,11 @@ def static_board_eval(game1):  # will return a value based on the board evaluati
                         if number > max_prime:
                             max_prime = number
             if max_prime > 0:
-                child_list= remove_all_available_tokens(list1,game1)
+                child_list = remove_all_available_tokens(list1, game1)
                 for child in child_list:
                     for number in child.remaining_token:
                         if number % max_prime == 0:
-                            multiplies = multiplies +1
+                            multiplies = multiplies + 1
                 if multiplies % 2 != 0:
                     x = -0.6
                     return x
@@ -198,8 +201,8 @@ def static_board_eval(game1):  # will return a value based on the board evaluati
             else:
                 x = 0.6
                 return x
-            
-            
+
+
 def build_search_tree(game1):
     tree1 = [game1]
     tree2 = [game1]
@@ -217,47 +220,65 @@ def build_search_tree(game1):
     return tree2
 
 
-def alpha_beta_search(node, alpha, beta, player):
+# to_end: boolean for depth input, reach: incrementing int for depth reach
+def alpha_beta_search(node, depth, alpha, beta, player, to_end, reach):
     global nodesEvaluated
+    global nodesVisited
+    global depthReaches
     list1 = tokens_to_remove(node)
-    if len(list1) == 0:
-        nodesEvaluated += 1
-        return static_board_eval(node)
+    if to_end:
+        if len(list1) == 0:
+            nodesEvaluated += 1
+            depthReaches.append(reach)
+            return static_board_eval(node)
+        child_depth = depth + 1
+    else:
+        if len(list1) == 0 or depth == 0:
+            nodesEvaluated += 1
+            depthReaches.append(reach)
+            return static_board_eval(node)
+        child_depth = depth - 1
     if player == "Max":
         v = -inf
         for i in remove_all_available_tokens(list1, node):
-            v = max(v, alpha_beta_search(i, alpha, beta, "Min"))
+            v = max(v, alpha_beta_search(i, child_depth, alpha, beta, "Min", to_end, reach + 1))
             alpha = max(alpha, v)
+            nodesVisited += 1
             if beta <= alpha:
                 break
         return v
     else:
         v = +inf
         for i in remove_all_available_tokens(list1, node):
-            v = min(v, alpha_beta_search(i, alpha, beta, "Max"))
+            v = min(v, alpha_beta_search(i, child_depth, alpha, beta, "Max", to_end, reach + 1))
             beta = min(beta, v)
+            nodesVisited += 1
             if beta <= alpha:
                 break
         return v
 
 
 def main():
-    game1 = game(10, 3, [4, 2, 6], 4, None)
-    test = alpha_beta_search(game1, float('-inf'), float('inf'), game1.player)
-    print("Value:", test)
-    print("Number of Nodes Evaluated:", nodesEvaluated)
-    
-"""
-def main():
-    game1 = game(7, 1, [1], 2, None)
-    print("the player is :", game1.player)
-    print("the player took these tokens", game1.list_token_taken)
-    print("the remaining tokens are :", game1.remaining_token)
-    search_tree = build_search_tree(game1)
-    print("the elements in the tree :")
-    for x in search_tree:
-        print("the element is", x.list_token_taken,"the player turn is",x.player, " the depth is ", x.depth)
-"""
+    global nodesEvaluated
+    global nodesVisited
+    global depthReaches
+    games = [game(7, 3, [1, 4, 2], 3, None), game(3, 0, [], 0, None), game(7, 1, [1], 2, None),
+             game(10, 3, [4, 2, 6], 4, None)]
+    for g in games:
+        if g.depth == 0:  # search to end game state
+            test = alpha_beta_search(g, g.depth, float('-inf'), float('inf'), g.player, True, 0)
+        else:
+            test = alpha_beta_search(g, g.depth, float('-inf'), float('inf'), g.player, False, 0)
+        print("Value:", test)
+        print("Number of Nodes Visited:", nodesVisited)
+        print("Number of Nodes Evaluated:", nodesEvaluated)
+        print("Max Depth Reached:", max(depthReaches))
+        print("Avg Effective Branching Factor", 0)
+        print()
+        nodesEvaluated = 0
+        nodesVisited = 1  # 1 for initial root node
+        depthReaches = []
+
 
 if __name__ == '__main__':
     main()
