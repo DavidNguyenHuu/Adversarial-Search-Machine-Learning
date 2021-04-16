@@ -256,28 +256,53 @@ def alpha_beta_search(node, depth, alpha, beta, player, to_end, reach):
             if beta <= alpha:
                 break
         return v
-
+    
+    
+def read_testcase():
+    games_list = []
+    with open('testcase.txt', 'r') as data:
+        for line in data:
+            line = line.strip().split()
+            if line[0] == "TakeTokens":
+                number_of_tokens = int(line[1])
+                number_of_taken_tokens = int(line[2])
+                if number_of_taken_tokens > 0:
+                    i = 3
+                    while i < 3 + int(line[2]):
+                        taken_token_list.append(int(line[i]))
+                        i = i + 1
+                    j = int(line[2])
+                    depth = int(line[3 + j])
+                else:
+                    taken_token_list = []
+                    depth = int(line[3])
+                g = game(number_of_tokens, number_of_taken_tokens, taken_token_list, depth, None)
+                games_list.append(g)
+                taken_token_list = []
+    return games_list
 
 def main():
     global nodesEvaluated
     global nodesVisited
     global depthReaches
-    games = [game(7, 3, [1, 4, 2], 3, None), game(3, 0, [], 0, None), game(7, 1, [1], 2, None),
-             game(10, 3, [4, 2, 6], 4, None)]
+    games = read_testcase()
     for g in games:
+        file_name = "output"+str(games.index(g)+1)+".txt"
+        f = open(file_name, 'w')
         if g.depth == 0:  # search to end game state
             test = alpha_beta_search(g, g.depth, float('-inf'), float('inf'), g.player, True, 0)
         else:
             test = alpha_beta_search(g, g.depth, float('-inf'), float('inf'), g.player, False, 0)
-        print("Value:", test)
-        print("Number of Nodes Visited:", nodesVisited)
-        print("Number of Nodes Evaluated:", nodesEvaluated)
-        print("Max Depth Reached:", max(depthReaches))
-        print("Avg Effective Branching Factor", 0)
-        print()
+
+        f.write("Value :" + str(test)+"\n")
+        f.write("Number of Nodes Visited:" + str(nodesVisited) + "\n")
+        f.write("Number of Nodes Evaluated:" + str(nodesEvaluated) + "\n")
+        f.write("Max Depth Reached:" + str(max(depthReaches)) + "\n")
+        f.write("Avg Effective Branching Factor :" + str(0) + "\n")
         nodesEvaluated = 0
         nodesVisited = 1  # 1 for initial root node
         depthReaches = []
+
 
 
 if __name__ == '__main__':
