@@ -239,23 +239,23 @@ def alpha_beta_search(node, depth, alpha, beta, player, to_end, reach):
             return static_board_eval(node)
         child_depth = depth - 1
     if player == "Max":
-        v = -inf
+        value = -inf
         for i in remove_all_available_tokens(list1, node):
-            v = max(v, alpha_beta_search(i, child_depth, alpha, beta, "Min", to_end, reach + 1))
-            alpha = max(alpha, v)
+            value = max(value, alpha_beta_search(i, child_depth, alpha, beta, "Min", to_end, reach + 1))
+            alpha = max(alpha, value)
             nodesVisited += 1
             if beta <= alpha:
                 break
-        return v
+        return value
     else:
-        v = +inf
+        value = +inf
         for i in remove_all_available_tokens(list1, node):
-            v = min(v, alpha_beta_search(i, child_depth, alpha, beta, "Max", to_end, reach + 1))
-            beta = min(beta, v)
+            value = min(value, alpha_beta_search(i, child_depth, alpha, beta, "Max", to_end, reach + 1))
+            beta = min(beta, value)
             nodesVisited += 1
             if beta <= alpha:
                 break
-        return v
+        return value
     
     
 def read_testcase():
@@ -290,11 +290,14 @@ def main():
         file_name = "output"+str(games.index(g)+1)+".txt"
         f = open(file_name, 'w')
         if g.depth == 0:  # search to end game state
-            test = alpha_beta_search(g, g.depth, float('-inf'), float('inf'), g.player, True, 0)
-        else:
-            test = alpha_beta_search(g, g.depth, float('-inf'), float('inf'), g.player, False, 0)
+            value= alpha_beta_search(g, g.depth, float('-inf'), float('inf'), g.player, True, 0)
 
-        f.write("Value :" + str(test)+"\n")
+        else:
+            value= alpha_beta_search(g, g.depth, float('-inf'), float('inf'), g.player, False, 0)
+        #branching_factor = nodesVisited/branchingFactorOfTotalChildren
+        #add move
+        f.write("Best Move :"+"\n")
+        f.write("Value :" + str(value)+"\n")
         f.write("Number of Nodes Visited:" + str(nodesVisited) + "\n")
         f.write("Number of Nodes Evaluated:" + str(nodesEvaluated) + "\n")
         f.write("Max Depth Reached:" + str(max(depthReaches)) + "\n")
