@@ -251,27 +251,51 @@ def alpha_beta_search(node, depth, alpha, beta, player, to_end, reach, depth_tar
             return static_board_eval(node)
         child_depth = depth - 1
     if player == "Max":
-        v = -inf
+        value = -inf
         for i in remove_all_available_tokens(list1, node):
-            v = max(v, alpha_beta_search(i, child_depth, alpha, beta, "Min", to_end, reach + 1, depth_target))
+            value = max(value, alpha_beta_search(i, child_depth, alpha, beta, "Min", to_end, reach + 1, depth_target))
             if child_depth == depth_target:
-                moves.append(move(i.list_token_taken[-1], v))
-            alpha = max(alpha, v)
+                moves.append(move(i.list_token_taken[-1], value))
+            alpha = max(alpha, value)
             nodesVisited += 1
             if beta <= alpha:
                 break
-        return v
+        return value
     else:
-        v = +inf
+        value = +inf
         for i in remove_all_available_tokens(list1, node):
-            v = min(v, alpha_beta_search(i, child_depth, alpha, beta, "Max", to_end, reach + 1, depth_target))
+            value = min(value, alpha_beta_search(i, child_depth, alpha, beta, "Max", to_end, reach + 1, depth_target))
             if child_depth == depth_target:
-                moves.append(move(i.list_token_taken[-1], v))
-            beta = min(beta, v)
+                moves.append(move(i.list_token_taken[-1], value))
+            beta = min(beta, value)
             nodesVisited += 1
             if beta <= alpha:
                 break
-        return v
+        return value
+
+
+def read_testcase():
+    games_list = []
+    with open('testcase.txt', 'r') as data:
+        for line in data:
+            line = line.strip().split()
+            if line[0] == "TakeTokens":
+                number_of_tokens = int(line[1])
+                number_of_taken_tokens = int(line[2])
+                if number_of_taken_tokens > 0:
+                    i = 3
+                    while i < 3 + int(line[2]):
+                        taken_token_list.append(int(line[i]))
+                        i = i + 1
+                    j = int(line[2])
+                    depth = int(line[3 + j])
+                else:
+                    taken_token_list = []
+                    depth = int(line[3])
+                g = game(number_of_tokens, number_of_taken_tokens, taken_token_list, depth, None)
+                games_list.append(g)
+                taken_token_list = []
+    return games_list
 
 
 def main():
@@ -279,32 +303,42 @@ def main():
     global nodesVisited
     global depthReaches
     global moves
-    games = [game(7, 3, [1, 4, 2], 3, None), game(3, 0, [], 0, None), game(7, 1, [1], 2, None),
-             game(10, 3, [4, 2, 6], 4, None)]
+    games = read_testcase()
     for g in games:
+        file_name = "output" + str(games.index(g) + 1) + ".txt"
+        f = open(file_name, 'w')
         if g.depth == 0:  # search to end game state
             alpha_beta_search(g, g.depth, float('-inf'), float('inf'), g.player, True, 0, g.depth + 1)
         else:
             alpha_beta_search(g, g.depth, float('-inf'), float('inf'), g.player, False, 0, g.depth - 1)
         moves.sort()
         print()
-
         if g.player == "Max":
             for m in moves:
                 if m.value == moves[-1].value:
-                    print("Move:", m.token)
+                    print("Best Move:", m.token)
                     print("Value:", m.value)
+                    f.write("Best Move: " + str(m.token) + "\n")
+                    f.write("Value: " + str(m.value) + "\n")
                     break
         else:
             for m in moves:
                 if m.value == moves[0].value:
-                    print("Move:", m.token)
+                    print("Best Move:", m.token)
                     print("Value:", m.value)
+                    f.write("Best Move: " + str(m.token) + "\n")
+                    f.write("Value: " + str(m.value) + "\n")
                     break
         print("Number of Nodes Visited:", nodesVisited)
         print("Number of Nodes Evaluated:", nodesEvaluated)
         print("Max Depth Reached:", max(depthReaches))
-        print("Avg Effective Branching Factor", round(((nodesVisited - 1) / (nodesVisited - nodesEvaluated)), 1))
+        print("Avg Effective Branching Factor:", round(((nodesVisited - 1) / (nodesVisited - nodesEvaluated)), 1))
+
+        f.write("Number of Nodes Visited: " + str(nodesVisited) + "\n")
+        f.write("Number of Nodes Evaluated: " + str(nodesEvaluated) + "\n")
+        f.write("Max Depth Reached: " + str(max(depthReaches)) + "\n")
+        f.write("Avg Effective Branching Factor: " + str(round(((nodesVisited - 1) / (nodesVisited - nodesEvaluated)), 1)) + "\n")
+
         nodesEvaluated = 0
         nodesVisited = 1  # 1 for initial root node
         depthReaches = []
