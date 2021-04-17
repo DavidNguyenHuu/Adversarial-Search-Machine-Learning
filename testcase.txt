@@ -3,4 +3,18 @@ input1:
 input2:
     TakeTokens 7 1 1 2
 input3:
-    TakeTokens 7 3 1 4 2 3
+    TakeTokens 10 3 4 2 6 4
+input4:
+     TakeTokens 20 6 7 14 2 4 12 1 7
+input5:
+    TakeTokens 30 8 9 3 6 12 2 4 8 16 9
+input6:
+     TakeTokens 40 10 15 5 10 2 4 12 6 18 9 36 11
+input7:
+    TakeTokens 50 13 21 7 14 2 4 8 16 9 27 3 18 6 30 13
+input8:
+     TakeTokens 60 14 27 9 3 6 2 4 8 16 1 5 25 50 10 20 15
+input9:
+    TakeTokens 70 15 33 3 9 18 6 2 4 8 32 64 16 48 1 5 25 16
+input10:
+     TakeTokens 80 18 25 5 10 30 15 3 6 2 4 8 16 48 12 36 9 72 18 54 19
