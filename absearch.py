@@ -304,45 +304,41 @@ def main():
     global depthReaches
     global moves
     games = read_testcase()
+
     for g in games:
+        start_time = time.time()
         file_name = "output" + str(games.index(g) + 1) + ".txt"
         f = open(file_name, 'w')
         if g.depth == 0:  # search to end game state
-            alpha_beta_search(g, g.depth, float('-inf'), float('inf'), g.player, True, 0, g.depth + 1)
+            test = alpha_beta_search(g, g.depth, float('-inf'), float('inf'), g.player, True, 0, g.depth + 1)
         else:
-            alpha_beta_search(g, g.depth, float('-inf'), float('inf'), g.player, False, 0, g.depth - 1)
+            test = alpha_beta_search(g, g.depth, float('-inf'), float('inf'), g.player, False, 0, g.depth - 1)
         moves.sort()
-        print()
         if g.player == "Max":
             for m in moves:
                 if m.value == moves[-1].value:
-                    print("Best Move:", m.token)
-                    print("Value:", m.value)
-                    f.write("Best Move: " + str(m.token) + "\n")
-                    f.write("Value: " + str(m.value) + "\n")
+                    f.write("Move: " + str(m.token) + "\n")
+                    f.write("Value: " + str(float(m.value)) + "\n")
                     break
         else:
             for m in moves:
                 if m.value == moves[0].value:
-                    print("Best Move:", m.token)
-                    print("Value:", m.value)
-                    f.write("Best Move: " + str(m.token) + "\n")
-                    f.write("Value: " + str(m.value) + "\n")
+                    f.write("Move: " + str(m.token) + "\n")
+                    f.write("Value: " + str(float(m.value)) + "\n")
                     break
-        print("Number of Nodes Visited:", nodesVisited)
-        print("Number of Nodes Evaluated:", nodesEvaluated)
-        print("Max Depth Reached:", max(depthReaches))
-        print("Avg Effective Branching Factor:", round(((nodesVisited - 1) / (nodesVisited - nodesEvaluated)), 1))
-
         f.write("Number of Nodes Visited: " + str(nodesVisited) + "\n")
         f.write("Number of Nodes Evaluated: " + str(nodesEvaluated) + "\n")
         f.write("Max Depth Reached: " + str(max(depthReaches)) + "\n")
-        f.write("Avg Effective Branching Factor: " + str(round(((nodesVisited - 1) / (nodesVisited - nodesEvaluated)), 1)) + "\n")
+        f.write("Avg Effective Branching Factor: " + str(
+            round(((nodesVisited - 1) / (nodesVisited - nodesEvaluated)), 1)) + "\n")
 
         nodesEvaluated = 0
         nodesVisited = 1  # 1 for initial root node
         depthReaches = []
         moves = []
+        end_time = time.time()
+        work_time = round((end_time-start_time), 1)
+        print("for game ", games.index(g)+1, " It took ", work_time, " to calculate the move")
 
 
 if __name__ == '__main__':
