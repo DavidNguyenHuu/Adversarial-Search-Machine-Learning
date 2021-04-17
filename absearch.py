@@ -6,6 +6,7 @@ import sympy.ntheory as sympy
 nodesEvaluated = 0
 nodesVisited = 1
 depthReaches = []
+moves = []
 
 
 def all_token1(s):  # will return a list for all the tokens in the game
@@ -54,6 +55,16 @@ class game:
             self.player = "Max"
         else:
             self.player = "Min"
+
+
+class move:
+
+    def __init__(self, token, value):
+        self.token = token
+        self.value = value
+
+    def __lt__(self, other):
+        return self.value < other.value
 
 
 def tokens_to_remove(game1):  # will return a list of tokens that can be removed
@@ -220,11 +231,12 @@ def build_search_tree(game1):
     return tree2
 
 
-# to_end: boolean for depth input, reach: incrementing int for depth reach
-def alpha_beta_search(node, depth, alpha, beta, player, to_end, reach):
+# to_end: boolean for search depth, reach: incrementing int for depth reach
+def alpha_beta_search(node, depth, alpha, beta, player, to_end, reach, depth_target):
     global nodesEvaluated
     global nodesVisited
     global depthReaches
+    global moves
     list1 = tokens_to_remove(node)
     if to_end:
         if len(list1) == 0:
@@ -241,7 +253,9 @@ def alpha_beta_search(node, depth, alpha, beta, player, to_end, reach):
     if player == "Max":
         v = -inf
         for i in remove_all_available_tokens(list1, node):
-            v = max(v, alpha_beta_search(i, child_depth, alpha, beta, "Min", to_end, reach + 1))
+            v = max(v, alpha_beta_search(i, child_depth, alpha, beta, "Min", to_end, reach + 1, depth_target))
+            if child_depth == depth_target:
+                moves.append(move(i.list_token_taken[-1], v))
             alpha = max(alpha, v)
             nodesVisited += 1
             if beta <= alpha:
@@ -250,7 +264,9 @@ def alpha_beta_search(node, depth, alpha, beta, player, to_end, reach):
     else:
         v = +inf
         for i in remove_all_available_tokens(list1, node):
-            v = min(v, alpha_beta_search(i, child_depth, alpha, beta, "Max", to_end, reach + 1))
+            v = min(v, alpha_beta_search(i, child_depth, alpha, beta, "Max", to_end, reach + 1, depth_target))
+            if child_depth == depth_target:
+                moves.append(move(i.list_token_taken[-1], v))
             beta = min(beta, v)
             nodesVisited += 1
             if beta <= alpha:
@@ -262,22 +278,37 @@ def main():
     global nodesEvaluated
     global nodesVisited
     global depthReaches
+    global moves
     games = [game(7, 3, [1, 4, 2], 3, None), game(3, 0, [], 0, None), game(7, 1, [1], 2, None),
              game(10, 3, [4, 2, 6], 4, None)]
     for g in games:
         if g.depth == 0:  # search to end game state
-            test = alpha_beta_search(g, g.depth, float('-inf'), float('inf'), g.player, True, 0)
+            alpha_beta_search(g, g.depth, float('-inf'), float('inf'), g.player, True, 0, g.depth + 1)
         else:
-            test = alpha_beta_search(g, g.depth, float('-inf'), float('inf'), g.player, False, 0)
-        print("Value:", test)
+            alpha_beta_search(g, g.depth, float('-inf'), float('inf'), g.player, False, 0, g.depth - 1)
+        moves.sort()
+        print()
+
+        if g.player == "Max":
+            for m in moves:
+                if m.value == moves[-1].value:
+                    print("Move:", m.token)
+                    print("Value:", m.value)
+                    break
+        else:
+            for m in moves:
+                if m.value == moves[0].value:
+                    print("Move:", m.token)
+                    print("Value:", m.value)
+                    break
         print("Number of Nodes Visited:", nodesVisited)
         print("Number of Nodes Evaluated:", nodesEvaluated)
         print("Max Depth Reached:", max(depthReaches))
-        print("Avg Effective Branching Factor", 0)
-        print()
+        print("Avg Effective Branching Factor", round(((nodesVisited - 1) / (nodesVisited - nodesEvaluated)), 1))
         nodesEvaluated = 0
         nodesVisited = 1  # 1 for initial root node
         depthReaches = []
+        moves = []
 
 
 if __name__ == '__main__':
